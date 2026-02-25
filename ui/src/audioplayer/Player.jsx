@@ -22,8 +22,11 @@ import {
   setPlayMode,
   setVolume,
   syncQueue,
+  updateProgress,
+  getTrackProgress,
 } from '../actions'
 import PlayerToolbar from './PlayerToolbar'
+import SeekIndicator from './SeekIndicator'
 import { sendNotification } from '../utils'
 import subsonic from '../subsonic'
 import locale from './locale'
@@ -42,6 +45,13 @@ const Player = () => {
   const [scrobbled, setScrobbled] = useState(false)
   const [preloaded, setPreload] = useState(false)
   const [audioInstance, setAudioInstance] = useState(null)
+  const [lastProgressUpdate, setLastProgressUpdate] = useState(0)
+  const [seekIndicator, setSeekIndicator] = useState({
+    isVisible: false,
+    direction: null,
+    currentTime: 0,
+    duration: 0,
+  })
   const isDesktop = useMediaQuery('(min-width:810px)')
   const isMobilePlayer =
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
@@ -188,8 +198,23 @@ const Player = () => {
         info.trackId && subsonic.scrobble(info.trackId, startTime)
         setScrobbled(true)
       }
+
+      // Save progress στο store
+      if (info.trackId && info.duration > 0) {
+        const now = Date.now()
+        // Αποθηκεύουμε progress κάθε 5 δευτερόλεπτα για να μην κάνουμε πολλές updates
+        if (now - lastProgressUpdate > 5000) {
+          dispatch(updateProgress(
+            info.trackId,
+            info.currentTime,
+            info.duration,
+            now
+          ))
+          setLastProgressUpdate(now)
+        }
+      }
     },
-    [startTime, scrobbled, nextSong, preloaded],
+    [startTime, scrobbled, nextSong, preloaded, dispatch, lastProgressUpdate],
   )
 
   const onAudioVolumeChange = useCallback(
@@ -282,7 +307,7 @@ const Player = () => {
   }
 
   const handlers = useMemo(
-    () => keyHandlers(audioInstance, playerState),
+    () => keyHandlers(audioInstance, playerState, setSeekIndicator),
     [audioInstance, playerState],
   )
 
@@ -308,6 +333,13 @@ const Player = () => {
         onCoverClick={onCoverClick}
         onBeforeDestroy={onBeforeDestroy}
         getAudioInstance={setAudioInstance}
+      />
+      <SeekIndicator
+        isVisible={seekIndicator.isVisible}
+        direction={seekIndicator.direction}
+        currentTime={seekIndicator.currentTime}
+        duration={seekIndicator.duration}
+        onAnimationComplete={() => setSeekIndicator(prev => ({ ...prev, isVisible: false }))}
       />
       <GlobalHotKeys handlers={handlers} keyMap={keyMap} allowChanges />
     </ThemeProvider>

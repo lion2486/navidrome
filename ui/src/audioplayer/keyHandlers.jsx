@@ -1,4 +1,4 @@
-const keyHandlers = (audioInstance, playerState) => {
+const keyHandlers = (audioInstance, playerState, setSeekIndicator) => {
   const nextSong = () => {
     const idx = playerState.queue.findIndex(
       (item) => item.uuid === playerState.current.uuid,
@@ -11,6 +11,42 @@ const keyHandlers = (audioInstance, playerState) => {
       (item) => item.uuid === playerState.current.uuid,
     )
     return idx !== null ? playerState.queue[idx - 1] : null
+  }
+
+  const seekBackward = () => {
+    if (audioInstance && audioInstance.currentTime !== undefined) {
+      const seekAmount = 10 // 10 seconds back
+      const newTime = Math.max(audioInstance.currentTime - seekAmount, 0)
+      audioInstance.currentTime = newTime
+      
+      // Εμφάνιση seek indicator
+      if (setSeekIndicator) {
+        setSeekIndicator({
+          isVisible: true,
+          direction: 'backward',
+          currentTime: newTime,
+          duration: audioInstance.duration || 0,
+        })
+      }
+    }
+  }
+
+  const seekForward = () => {
+    if (audioInstance && audioInstance.currentTime !== undefined && audioInstance.duration !== undefined) {
+      const seekAmount = 10 // 10 seconds forward
+      const newTime = Math.min(audioInstance.currentTime + seekAmount, audioInstance.duration)
+      audioInstance.currentTime = newTime
+      
+      // Show seek indicator
+      if (setSeekIndicator) {
+        setSeekIndicator({
+          isVisible: true,
+          direction: 'forward',
+          currentTime: newTime,
+          duration: audioInstance.duration || 0,
+        })
+      }
+    }
   }
 
   return {
@@ -30,6 +66,14 @@ const keyHandlers = (audioInstance, playerState) => {
     },
     NEXT_SONG: (e) => {
       if (!e.metaKey && nextSong()) audioInstance && audioInstance.playNext()
+    },
+    SEEK_BACKWARD: (e) => {
+      e.preventDefault()
+      seekBackward()
+    },
+    SEEK_FORWARD: (e) => {
+      e.preventDefault()
+      seekForward()
     },
   }
 }
