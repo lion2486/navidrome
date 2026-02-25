@@ -49,15 +49,16 @@ const useStyles = makeStyles((theme) => ({
  * @param {boolean} props.showDetails - Αν θα δείξει λεπτομέρειες
  * @param {boolean} props.compact - Compact mode
  */
-const ProgressIndicator = ({ 
-  trackId, 
-  track = {}, 
-  showDetails = true, 
-  compact = false 
+const ProgressIndicator = ({
+  trackId,
+  track = {},
+  showDetails = true,
+  compact = false,
 }) => {
   const classes = useStyles()
-  const { getProgress, getProgressPercentage, getLastPlayedTime } = useProgress()
-  
+  const { getProgress, getProgressPercentage, getLastPlayedTime } =
+    useProgress()
+
   const progress = getProgress(trackId)
   const progressPercentage = getProgressPercentage(trackId)
   const lastPlayed = getLastPlayedTime(trackId)
@@ -110,13 +111,13 @@ const ProgressIndicator = ({
           </Typography>
         </Box>
       )}
-      
+
       <LinearProgress
         className={classes.progressBar}
         variant="determinate"
         value={progressPercentage}
       />
-      
+
       {showDetails && lastPlayed && (
         <Typography className={classes.progressText}>
           Τελευταία ακρόαση: {formatDate(lastPlayed)}

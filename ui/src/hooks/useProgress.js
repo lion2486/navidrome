@@ -43,11 +43,11 @@ export const useProgress = () => {
     // Data
     tracks: progressState.tracks,
     settings: progressState.settings,
-    
+
     // Actions
     updateTrackProgress,
     clearTrackProgress,
-    
+
     // Getters
     getProgress,
     getAllProgress,

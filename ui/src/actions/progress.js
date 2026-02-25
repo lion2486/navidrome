@@ -9,17 +9,17 @@ export const updateProgress = (trackId, currentTime, duration, lastPlayed) => ({
     currentTime,
     duration,
     lastPlayed,
-  }
+  },
 })
 
 export const clearProgress = (trackId) => ({
   type: PROGRESS_CLEAR,
-  data: { trackId }
+  data: { trackId },
 })
 
 export const loadProgress = (tracks, settings) => ({
   type: PROGRESS_LOAD,
-  data: { tracks, settings }
+  data: { tracks, settings },
 })
 
 // Helper function για να πάρουμε το progress ενός τραγουδιού

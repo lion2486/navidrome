@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import { Fade, Typography, Box } from '@material-ui/core'
-import { 
-  FastRewind as RewindIcon, 
-  FastForward as ForwardIcon 
+import {
+  FastRewind as RewindIcon,
+  FastForward as ForwardIcon,
 } from '@material-ui/icons'
 
 const useStyles = makeStyles((theme) => ({
@@ -45,12 +45,12 @@ const useStyles = makeStyles((theme) => ({
 /**
  * Component που δείχνει visual feedback όταν γίνεται seeking
  */
-const SeekIndicator = ({ 
-  isVisible, 
-  direction, 
-  currentTime, 
+const SeekIndicator = ({
+  isVisible,
+  direction,
+  currentTime,
   duration,
-  onAnimationComplete 
+  onAnimationComplete,
 }) => {
   const classes = useStyles()
   const [show, setShow] = useState(false)
@@ -84,7 +84,11 @@ const SeekIndicator = ({
   }
 
   const getIcon = () => {
-    return direction === 'backward' ? <RewindIcon className={classes.icon} /> : <ForwardIcon className={classes.icon} />
+    return direction === 'backward' ? (
+      <RewindIcon className={classes.icon} />
+    ) : (
+      <ForwardIcon className={classes.icon} />
+    )
   }
 
   if (!show) return null
@@ -95,9 +99,7 @@ const SeekIndicator = ({
         <Box className={classes.indicator}>
           {getIcon()}
           <Box>
-            <Typography className={classes.text}>
-              {getSeekAmount()}
-            </Typography>
+            <Typography className={classes.text}>{getSeekAmount()}</Typography>
             <Typography className={classes.timeText}>
               {formatTime(currentTime)} / {formatTime(duration)}
             </Typography>

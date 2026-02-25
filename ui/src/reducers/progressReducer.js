@@ -1,8 +1,4 @@
-import {
-  PROGRESS_UPDATE,
-  PROGRESS_CLEAR,
-  PROGRESS_LOAD,
-} from '../actions'
+import { PROGRESS_UPDATE, PROGRESS_CLEAR, PROGRESS_LOAD } from '../actions'
 
 const initialState = {
   // Object με trackId ως key και progress data ως value
@@ -12,10 +8,13 @@ const initialState = {
   settings: {
     autoSave: true,
     saveInterval: 5000, // milliseconds
-  }
+  },
 }
 
-const reduceUpdateProgress = (state, { data: { trackId, currentTime, duration, lastPlayed } }) => {
+const reduceUpdateProgress = (
+  state,
+  { data: { trackId, currentTime, duration, lastPlayed } },
+) => {
   if (!trackId) return state
 
   return {
@@ -27,8 +26,8 @@ const reduceUpdateProgress = (state, { data: { trackId, currentTime, duration, l
         duration: duration || 0,
         lastPlayed: lastPlayed || Date.now(),
         progress: duration > 0 ? (currentTime / duration) * 100 : 0,
-      }
-    }
+      },
+    },
   }
 }
 
@@ -37,10 +36,10 @@ const reduceClearProgress = (state, { data: { trackId } }) => {
 
   const newTracks = { ...state.tracks }
   delete newTracks[trackId]
-  
+
   return {
     ...state,
-    tracks: newTracks
+    tracks: newTracks,
   }
 }
 
@@ -48,7 +47,7 @@ const reduceLoadProgress = (state, { data }) => {
   return {
     ...state,
     tracks: data.tracks || {},
-    settings: { ...state.settings, ...data.settings }
+    settings: { ...state.settings, ...data.settings },
   }
 }
 

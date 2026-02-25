@@ -1,14 +1,14 @@
 import React from 'react'
 import { makeStyles } from '@material-ui/core/styles'
-import { 
-  List, 
-  ListItem, 
-  ListItemText, 
+import {
+  List,
+  ListItem,
+  ListItemText,
   ListItemSecondaryAction,
   IconButton,
   Typography,
   Box,
-  Chip
+  Chip,
 } from '@material-ui/core'
 import { Delete as DeleteIcon } from '@material-ui/icons'
 import useProgress from '../hooks/useProgress'
@@ -56,8 +56,9 @@ const useStyles = makeStyles((theme) => ({
  */
 const ProgressList = ({ onTrackSelect, showClearButton = true }) => {
   const classes = useStyles()
-  const { getAllProgress, clearTrackProgress, getProgressPercentage } = useProgress()
-  
+  const { getAllProgress, clearTrackProgress, getProgressPercentage } =
+    useProgress()
+
   const progressData = getAllProgress()
   const tracks = Object.entries(progressData)
 
@@ -86,7 +87,7 @@ const ProgressList = ({ onTrackSelect, showClearButton = true }) => {
     <List className={classes.root}>
       {tracks.map(([trackId, progress]) => {
         const progressPercentage = Math.round(progress.progress)
-        
+
         return (
           <ListItem
             key={trackId}
@@ -102,10 +103,20 @@ const ProgressList = ({ onTrackSelect, showClearButton = true }) => {
                   </Typography>
                   <Box display="flex" alignItems="center">
                     <Typography className={classes.trackArtist}>
-                      {progress.duration > 0 
-                        ? `${Math.floor(progress.currentTime / 60)}:${Math.floor(progress.currentTime % 60).toString().padStart(2, '0')} / ${Math.floor(progress.duration / 60)}:${Math.floor(progress.duration % 60).toString().padStart(2, '0')}`
-                        : 'Άγνωστη διάρκεια'
-                      }
+                      {progress.duration > 0
+                        ? `${Math.floor(progress.currentTime / 60)}:${Math.floor(
+                            progress.currentTime % 60,
+                          )
+                            .toString()
+                            .padStart(
+                              2,
+                              '0',
+                            )} / ${Math.floor(progress.duration / 60)}:${Math.floor(
+                            progress.duration % 60,
+                          )
+                            .toString()
+                            .padStart(2, '0')}`
+                        : 'Άγνωστη διάρκεια'}
                     </Typography>
                     <Chip
                       label={`${progressPercentage}%`}
@@ -118,10 +129,7 @@ const ProgressList = ({ onTrackSelect, showClearButton = true }) => {
               }
               secondary={
                 <Box className={classes.progressContainer}>
-                  <ProgressIndicator
-                    trackId={trackId}
-                    compact
-                  />
+                  <ProgressIndicator trackId={trackId} compact />
                 </Box>
               }
             />

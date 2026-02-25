@@ -18,7 +18,7 @@ const keyHandlers = (audioInstance, playerState, setSeekIndicator) => {
       const seekAmount = 10 // 10 seconds back
       const newTime = Math.max(audioInstance.currentTime - seekAmount, 0)
       audioInstance.currentTime = newTime
-      
+
       // Εμφάνιση seek indicator
       if (setSeekIndicator) {
         setSeekIndicator({
@@ -32,11 +32,18 @@ const keyHandlers = (audioInstance, playerState, setSeekIndicator) => {
   }
 
   const seekForward = () => {
-    if (audioInstance && audioInstance.currentTime !== undefined && audioInstance.duration !== undefined) {
+    if (
+      audioInstance &&
+      audioInstance.currentTime !== undefined &&
+      audioInstance.duration !== undefined
+    ) {
       const seekAmount = 10 // 10 seconds forward
-      const newTime = Math.min(audioInstance.currentTime + seekAmount, audioInstance.duration)
+      const newTime = Math.min(
+        audioInstance.currentTime + seekAmount,
+        audioInstance.duration,
+      )
       audioInstance.currentTime = newTime
-      
+
       // Show seek indicator
       if (setSeekIndicator) {
         setSeekIndicator({

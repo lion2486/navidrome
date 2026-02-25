@@ -218,12 +218,9 @@ const Player = () => {
         const now = Date.now()
         // Αποθηκεύουμε progress κάθε 5 δευτερόλεπτα για να μην κάνουμε πολλές updates
         if (now - lastProgressUpdate > 5000) {
-          dispatch(updateProgress(
-            info.trackId,
-            info.currentTime,
-            info.duration,
-            now
-          ))
+          dispatch(
+            updateProgress(info.trackId, info.currentTime, info.duration, now),
+          )
           setLastProgressUpdate(now)
         }
       }
@@ -353,7 +350,9 @@ const Player = () => {
         direction={seekIndicator.direction}
         currentTime={seekIndicator.currentTime}
         duration={seekIndicator.duration}
-        onAnimationComplete={() => setSeekIndicator(prev => ({ ...prev, isVisible: false }))}
+        onAnimationComplete={() =>
+          setSeekIndicator((prev) => ({ ...prev, isVisible: false }))
+        }
       />
       <GlobalHotKeys handlers={handlers} keyMap={keyMap} allowChanges />
     </ThemeProvider>
