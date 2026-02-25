@@ -61,7 +61,12 @@ func (c Criteria) OrderBy() string {
 		if f.order != "" {
 			mapped = f.order
 		} else if f.isTag {
-			mapped = "COALESCE(json_extract(media_file.tags, '$." + sortField + "[0].value'), '')"
+			// Use the actual field name (handles aliases like albumtype -> releasetype)
+			tagName := sortField
+			if f.field != "" {
+				tagName = f.field
+			}
+			mapped = "COALESCE(json_extract(media_file.tags, '$." + tagName + "[0].value'), '')"
 		} else if f.isRole {
 			mapped = "COALESCE(json_extract(media_file.participants, '$." + sortField + "[0].name'), '')"
 		} else {
@@ -88,6 +93,25 @@ func (c Criteria) OrderBy() string {
 
 func (c Criteria) ToSql() (sql string, args []any, err error) {
 	return c.Expression.ToSql()
+}
+
+// RequiredJoins inspects the expression tree and Sort field to determine which
+// additional JOINs are needed when evaluating this criteria.
+func (c Criteria) RequiredJoins() JoinType {
+	result := JoinNone
+	if c.Expression != nil {
+		result |= extractJoinTypes(c.Expression)
+	}
+	// Also check Sort fields
+	if c.Sort != "" {
+		for _, p := range strings.Split(c.Sort, ",") {
+			p = strings.TrimSpace(p)
+			p = strings.TrimLeft(p, "+-")
+			p = strings.TrimSpace(p)
+			result |= fieldJoinType(p)
+		}
+	}
+	return result
 }
 
 func (c Criteria) ChildPlaylistIds() []string {

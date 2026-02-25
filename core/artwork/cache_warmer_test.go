@@ -90,6 +90,7 @@ var _ = Describe("CacheWarmer", func() {
 		})
 
 		It("deduplicates items in buffer", func() {
+			fc.SetReady(false) // Make cache unavailable so items stay in buffer
 			cw := NewCacheWarmer(aw, fc).(*cacheWarmer)
 			cw.PreCache(model.MustParseArtworkID("al-1"))
 			cw.PreCache(model.MustParseArtworkID("al-1"))
@@ -142,7 +143,7 @@ var _ = Describe("CacheWarmer", func() {
 
 		It("processes items in batches", func() {
 			cw := NewCacheWarmer(aw, fc).(*cacheWarmer)
-			for i := 0; i < 5; i++ {
+			for i := range 5 {
 				cw.PreCache(model.MustParseArtworkID(fmt.Sprintf("al-%d", i)))
 			}
 

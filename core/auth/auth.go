@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"context"
 	"crypto/sha256"
+	"maps"
 	"sync"
 	"time"
 
@@ -53,9 +54,7 @@ func createBaseClaims() map[string]any {
 
 func CreatePublicToken(claims map[string]any) (string, error) {
 	tokenClaims := createBaseClaims()
-	for k, v := range claims {
-		tokenClaims[k] = v
-	}
+	maps.Copy(tokenClaims, claims)
 	_, token, err := TokenAuth.Encode(tokenClaims)
 
 	return token, err
@@ -66,9 +65,7 @@ func CreateExpiringPublicToken(exp time.Time, claims map[string]any) (string, er
 	if !exp.IsZero() {
 		tokenClaims[jwt.ExpirationKey] = exp.UTC().Unix()
 	}
-	for k, v := range claims {
-		tokenClaims[k] = v
-	}
+	maps.Copy(tokenClaims, claims)
 	_, token, err := TokenAuth.Encode(tokenClaims)
 
 	return token, err
@@ -100,7 +97,7 @@ func TouchToken(token jwt.Token) (string, error) {
 	return newToken, err
 }
 
-func Validate(tokenStr string) (map[string]interface{}, error) {
+func Validate(tokenStr string) (map[string]any, error) {
 	token, err := jwtauth.VerifyToken(TokenAuth, tokenStr)
 	if err != nil {
 		return nil, err
@@ -113,9 +110,9 @@ func WithAdminUser(ctx context.Context, ds model.DataStore) context.Context {
 	if err != nil {
 		c, err := ds.User(ctx).CountAll()
 		if c == 0 && err == nil {
-			log.Debug(ctx, "Scanner: No admin user yet!", err)
+			log.Debug(ctx, "No admin user yet!", err)
 		} else {
-			log.Error(ctx, "Scanner: No admin user found!", err)
+			log.Error(ctx, "No admin user found!", err)
 		}
 		u = &model.User{}
 	}

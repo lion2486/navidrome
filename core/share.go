@@ -13,6 +13,7 @@ import (
 	"github.com/navidrome/navidrome/model"
 	. "github.com/navidrome/navidrome/utils/gg"
 	"github.com/navidrome/navidrome/utils/slice"
+	"github.com/navidrome/navidrome/utils/str"
 )
 
 type Share interface {
@@ -86,7 +87,7 @@ func (r *shareRepositoryWrapper) newId() (string, error) {
 	}
 }
 
-func (r *shareRepositoryWrapper) Save(entity interface{}) (string, error) {
+func (r *shareRepositoryWrapper) Save(entity any) (string, error) {
 	s := entity.(*model.Share)
 	id, err := r.newId()
 	if err != nil {
@@ -119,15 +120,14 @@ func (r *shareRepositoryWrapper) Save(entity interface{}) (string, error) {
 		log.Error(r.ctx, "Invalid Resource ID", "id", firstId)
 		return "", model.ErrNotFound
 	}
-	if len(s.Contents) > 30 {
-		s.Contents = s.Contents[:26] + "..."
-	}
+
+	s.Contents = str.TruncateRunes(s.Contents, 30, "...")
 
 	id, err = r.Persistable.Save(s)
 	return id, err
 }
 
-func (r *shareRepositoryWrapper) Update(id string, entity interface{}, _ ...string) error {
+func (r *shareRepositoryWrapper) Update(id string, entity any, _ ...string) error {
 	cols := []string{"description", "downloadable"}
 
 	// TODO Better handling of Share expiration

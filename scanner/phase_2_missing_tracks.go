@@ -2,6 +2,7 @@ package scanner
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 	"sync/atomic"
@@ -69,9 +70,6 @@ func (p *phaseMissingTracks) produce(put func(tracks *missingTracks)) error {
 		}
 	}
 	for _, lib := range p.state.libraries {
-		if lib.LastScanStartedAt.IsZero() {
-			continue
-		}
 		log.Debug(p.ctx, "Scanner: Checking missing tracks", "libraryId", lib.ID, "libraryName", lib.Name)
 		cursor, err := p.ds.MediaFile(p.ctx).GetMissingAndMatching(lib.ID)
 		if err != nil {
@@ -190,6 +188,13 @@ func (p *phaseMissingTracks) processCrossLibraryMoves(in *missingTracks) (*missi
 		return nil, nil
 	}
 
+	// Skip cross-library move detection when only one library is configured
+	// since there are no other libraries to search in.
+	if p.state.totalLibraryCount == 1 {
+		log.Debug(p.ctx, "Scanner: Skipping cross-library move detection (single library)")
+		return in, nil
+	}
+
 	log.Debug(p.ctx, "Scanner: Processing cross-library moves", "pid", in.pid, "missing", len(in.missing), "lib", in.lib.Name)
 
 	for _, missing := range in.missing {
@@ -263,6 +268,10 @@ func (p *phaseMissingTracks) moveMatched(target, missing model.MediaFile) error 
 		oldAlbumID := missing.AlbumID
 		newAlbumID := target.AlbumID
 
+		// Preserve the original created_at from the missing file, so moved tracks
+		// don't appear in "Recently Added"
+		target.CreatedAt = missing.CreatedAt
+
 		// Update the target media file with the missing file's ID. This effectively "moves" the track
 		// to the new location while keeping its annotations and references intact.
 		target.ID = missing.ID
@@ -292,6 +301,14 @@ func (p *phaseMissingTracks) moveMatched(target, missing model.MediaFile) error 
 					log.Debug(p.ctx, "Scanner: Reassigning album annotations", "from", oldAlbumID, "to", newAlbumID)
 					if err := tx.Album(p.ctx).ReassignAnnotation(oldAlbumID, newAlbumID); err != nil {
 						log.Warn(p.ctx, "Scanner: Could not reassign album annotations", "from", oldAlbumID, "to", newAlbumID, err)
+					}
+
+					// Keep created_at field from previous instance of the album, so moved albums
+					// don't appear in "Recently Added"
+					if err := tx.Album(p.ctx).CopyAttributes(oldAlbumID, newAlbumID, "created_at"); err != nil {
+						if !errors.Is(err, model.ErrNotFound) {
+							log.Warn(p.ctx, "Scanner: Could not copy album created_at", "from", oldAlbumID, "to", newAlbumID, err)
+						}
 					}
 
 					// Note: RefreshPlayCounts will be called in later phases, so we don't need to call it here
